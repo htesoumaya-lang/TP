@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Drone GeoTIFF</title>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 20px; 
+            font-family: Arial; 
+            background: #2c3e50;
+        }
+        .container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border: 3px solid #3498db;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 20px;
+        }
+        .logo {
+            height: 80px;
+            margin-bottom: 15px;
+        }
+        h1 { 
+            color: #2c3e50; 
+            margin: 0;
+            font-size: 28px;
+        }
+        .image-container {
+            border: 3px solid #34495e;
+            border-radius: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            margin: 0 auto;
+            display: inline-block;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 0; /* Supprimer l'espace entre les tuiles */
+            width: 1024px;
+            height: 1024px;
+            margin: 0 auto;
+            border: 2px solid #7f8c8d;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .tile {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            margin: 0;
+            padding: 0;
+            border: none;
+        }
+        .controls {
+            text-align: center;
+            margin: 25px 0;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            margin: 0 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .info {
+            text-align: center;
+            color: #7f8c8d;
+            margin-top: 20px;
+            font-style: italic;
+        }
+        .single-image-container {
+            text-align: center;
+            border: 3px solid #34495e;
+            border-radius: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            margin: 0 auto;
+            display: inline-block;
+        }
+        .single-image {
+            max-width: 100%;
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- EN-TÊTE AVEC LOGO ET TITRE -->
+        <div class="header">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/54/Logo_iav.png" 
+                 alt="Logo IAV" 
+                 class="logo">
+            <h1>Image Drone GeoTIFF</h1>
+        </div>
+        
+        <div class="controls">
+            <button onclick="showView('composite')">Vue Composite </button>
+            <button onclick="showView('single')">Vue Simple</button>
+        </div>
+
+        <!-- VUE COMPOSITE - 16 tuiles recomposées SANS ESPACE -->
+        <div id="compositeView">
+            <div class="image-container">
+                <div class="image-grid" id="imageGrid">
+                    <!-- Les 16 tuiles seront chargées par JavaScript -->
+                </div>
+            </div>
+            <div class="info">
+                <p>Image recomposée à partir de 16 sections haute définition - Affichage unifié</p>
+            </div>
+        </div>
+
+        <!-- VUE SIMPLE - Image unique AVEC CADRE -->
+        <div id="singleView" style="display: none;">
+            <div class="single-image-container">
+                <img src="file:///C:/METASHAPE/tuiles_ameliore/0.png" 
+                     alt="Vue complète" 
+                     class="single-image">
+            </div>
+            <div class="info">
+                <p>Vue complète en résolution standard</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration des tuiles
+        const tilePaths = [
+            "file:///C:/METASHAPE/tuiles_ameliore/1_0.png",
+            "file:///C:/METASHAPE/tuiles_ameliore/1.png", 
+            "file:///C:/METASHAPE/tuiles_ameliore/2.png",
+            "file:///C:/METASHAPE/tuiles_ameliore/3.png",
+            "file:///C:/METASHAPE/tuiles_ameliore/4.png",
+            "file:///C:/METASHAPE/tuiles_ameliore/5.png",
+            "file:///C:/METASHAPE/tuiles_ameliore/6.png",
+            "file:///C:/METASHAPE/tuiles_ameliore/7.png",
+            "file:///C:/METASHAPE/tuiles_ameliore/8.png",
+            "file:///C:/METASHAPE/tuiles_ameliore/9.png",
+            "file:///C:/METASHAPE/tuiles_ameliore/10.png",
+            "file:///C:/METASHAPE/tuiles_ameliore/11.png",
+            "file:///C:/METASHAPE/tuiles_ameliore/12.png",
+            "file:///C:/METASHAPE/tuiles_ameliore/13.png",
+            "file:///C:/METASHAPE/tuiles_ameliore/14.png",
+            "file:///C:/METASHAPE/tuiles_ameliore/15.png"
+        ];
+
+        // Charger les tuiles dans la grille
+        const grid = document.getElementById('imageGrid');
+        tilePaths.forEach((path, index) => {
+            const img = document.createElement('img');
+            img.src = path;
+            img.alt = `Section ${index}`;
+            img.className = 'tile';
+            img.onerror = function() {
+                this.src = 'https://via.placeholder.com/256/ecf0f1/34495e?text=Tuile+' + index;
+            };
+            grid.appendChild(img);
+        });
+
+        // Contrôles de vue
+        function showView(viewType) {
+            if (viewType === 'composite') {
+                document.getElementById('compositeView').style.display = 'block';
+                document.getElementById('singleView').style.display = 'none';
+            } else {
+                document.getElementById('compositeView').style.display = 'none';
+                document.getElementById('singleView').style.display = 'block';
+            }
+        }
+
+        // Afficher la vue composite par défaut
+        showView('composite');
+    </script>
+</body>
+</html>
