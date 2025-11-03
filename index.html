@@ -9,10 +9,12 @@
             padding: 20px; 
             font-family: Arial; 
             background: #2c3e50;
+            display: flex;
+            justify-content: center;
         }
         .container { 
             max-width: 1400px; 
-            margin: 0 auto; 
+            width: 100%;
             background: white; 
             padding: 30px; 
             border-radius: 15px;
@@ -38,13 +40,12 @@
         /* CENTRER LES CONTENEURS D'IMAGES */
         .image-container,
         .single-image-container {
-            text-align: center; /* centre horizontalement */
+            text-align: center;
             border: 3px solid #34495e;
             border-radius: 10px;
             padding: 10px;
             background: #f8f9fa;
-            margin: 0 auto;
-            display: inline-block;
+            margin: 0 auto 20px auto;
         }
 
         .image-grid {
@@ -61,7 +62,6 @@
         }
         .tile,
         .single-image {
-            display: inline-block; /* permet au parent text-align: center de centrer */
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -132,10 +132,15 @@
     </div>
 
     <script>
-        // Liste des tuiles (0.png à 15.png)
-        const tilePaths = Array.from({length: 16}, (_, i) => `${i}.png`);
+        // Ordre exact des tuiles
+        const tilePaths = [
+            "1_0.png", "1.png", "2.png", "3.png",
+            "4.png", "5.png", "6.png", "7.png",
+            "8.png", "9.png", "10.png", "11.png",
+            "12.png", "13.png", "14.png", "15.png"
+        ];
 
-        // Charger les tuiles dans la grille
+        // Charger les tuiles
         const grid = document.getElementById('imageGrid');
         tilePaths.forEach((path, index) => {
             const img = document.createElement('img');
